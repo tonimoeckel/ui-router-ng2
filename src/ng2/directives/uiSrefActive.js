@@ -1,6 +1,19 @@
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 /** @module directives */ /** */
-import { ElementRef, Renderer } from "@angular/core";
-import { UISrefStatus } from "./uiSrefStatus";
+var core_1 = require("@angular/core");
+var uiSrefStatus_1 = require("./uiSrefStatus");
 /**
  * A directive that adds a CSS class when its associated `uiSref` link is active.
  *
@@ -79,12 +92,49 @@ import { UISrefStatus } from "./uiSrefStatus";
  * </ul>
  * ```
  */
-export declare class UISrefActive {
-    private _classes;
-    active: string;
-    private _classesEq;
-    activeEq: string;
-    private _subscription;
-    constructor(uiSrefStatus: UISrefStatus, rnd: Renderer, host: ElementRef);
-    ngOnDestroy(): void;
-}
+var UISrefActive = (function () {
+    function UISrefActive(uiSrefStatus, rnd, host) {
+        var _this = this;
+        this._classes = [];
+        this._classesEq = [];
+        this._subscription = uiSrefStatus.uiSrefStatus.subscribe(function (next) {
+            _this._classes.forEach(function (cls) { return rnd.setElementClass(host.nativeElement, cls, next.active); });
+            _this._classesEq.forEach(function (cls) { return rnd.setElementClass(host.nativeElement, cls, next.exact); });
+        });
+    }
+    Object.defineProperty(UISrefActive.prototype, "active", {
+        set: function (val) { this._classes = val.split("\s+"); },
+        enumerable: true,
+        configurable: true
+    });
+    ;
+    Object.defineProperty(UISrefActive.prototype, "activeEq", {
+        set: function (val) { this._classesEq = val.split("\s+"); },
+        enumerable: true,
+        configurable: true
+    });
+    ;
+    UISrefActive.prototype.ngOnDestroy = function () {
+        this._subscription.unsubscribe();
+    };
+    __decorate([
+        core_1.Input('uiSrefActive'), 
+        __metadata('design:type', String), 
+        __metadata('design:paramtypes', [String])
+    ], UISrefActive.prototype, "active", null);
+    __decorate([
+        core_1.Input('uiSrefActiveEq'), 
+        __metadata('design:type', String), 
+        __metadata('design:paramtypes', [String])
+    ], UISrefActive.prototype, "activeEq", null);
+    UISrefActive = __decorate([
+        core_1.Directive({
+            selector: '[uiSrefActive],[uiSrefActiveEq]'
+        }),
+        __param(2, core_1.Host()), 
+        __metadata('design:paramtypes', [uiSrefStatus_1.UISrefStatus, core_1.Renderer, core_1.ElementRef])
+    ], UISrefActive);
+    return UISrefActive;
+}());
+exports.UISrefActive = UISrefActive;
+//# sourceMappingURL=uiSrefActive.js.map

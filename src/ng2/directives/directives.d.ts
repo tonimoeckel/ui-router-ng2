@@ -16,10 +16,10 @@ export * from "./uiSref";
 export * from "./uiSrefStatus";
 export * from "./uiSrefActive";
 /** @internalapi */
-export declare const _UIROUTER_DIRECTIVES: (typeof UIView | typeof UISref | typeof AnchorUISref | typeof UISrefActive | typeof UISrefStatus)[];
+export declare const _UIROUTER_DIRECTIVES: (typeof UIView | typeof AnchorUISref | typeof UISref | typeof UISrefStatus | typeof UISrefActive)[];
 /**
  * References to the UI-Router directive classes, for use within a @Component's `directives:` property
  * @deprecated use [[UIRouterModule]]
  * @internalapi
  */
-export declare const UIROUTER_DIRECTIVES: (typeof UIView | typeof UISref | typeof AnchorUISref | typeof UISrefActive | typeof UISrefStatus)[];
+export declare const UIROUTER_DIRECTIVES: (typeof UIView | typeof AnchorUISref | typeof UISref | typeof UISrefStatus | typeof UISrefActive)[];
