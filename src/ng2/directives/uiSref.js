@@ -5,21 +5,14 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-/** @module directives */ /** */
-var ui_router_core_1 = require("ui-router-core");
 var core_1 = require("@angular/core");
 var core_2 = require("@angular/core");
-var core_3 = require("@angular/core");
-var core_4 = require("@angular/core");
 var uiView_1 = require("./uiView");
+var ui_router_core_1 = require("ui-router-core");
 var ui_router_core_2 = require("ui-router-core");
-var ui_router_core_3 = require("ui-router-core");
 var ReplaySubject_1 = require('rxjs/ReplaySubject');
 require("../rx");
 /**
@@ -35,8 +28,7 @@ var AnchorUISref = (function () {
         this._renderer.setElementProperty(this._el.nativeElement, 'href', href);
     };
     AnchorUISref = __decorate([
-        core_1.Directive({ selector: 'a[uiSref]' }), 
-        __metadata('design:paramtypes', [core_3.ElementRef, core_4.Renderer])
+        core_1.Directive({ selector: 'a[uiSref]' })
     ], AnchorUISref);
     return AnchorUISref;
 }());
@@ -144,7 +136,7 @@ var UISref = (function () {
             inherit: true,
             source: "sref"
         };
-        return ui_router_core_2.extend(defaultOpts, this.options || {});
+        return ui_router_core_1.extend(defaultOpts, this.options || {});
     };
     /** When triggered by a (click) event, this function transitions to the UISref's target state */
     UISref.prototype.go = function () {
@@ -152,17 +144,14 @@ var UISref = (function () {
         return false;
     };
     __decorate([
-        core_1.Input('uiSref'), 
-        __metadata('design:type', String)
-    ], UISref.prototype, "state", void 0);
+        core_1.Input('uiSref')
+    ], UISref.prototype, "state");
     __decorate([
-        core_1.Input('uiParams'), 
-        __metadata('design:type', Object)
-    ], UISref.prototype, "params", void 0);
+        core_1.Input('uiParams')
+    ], UISref.prototype, "params");
     __decorate([
-        core_1.Input('uiOptions'), 
-        __metadata('design:type', Object)
-    ], UISref.prototype, "options", void 0);
+        core_1.Input('uiOptions')
+    ], UISref.prototype, "options");
     UISref = __decorate([
         core_1.Directive({
             selector: '[uiSref]',
@@ -170,8 +159,7 @@ var UISref = (function () {
         }),
         __param(1, core_1.Inject(uiView_1.UIView.PARENT_INJECT)),
         __param(2, core_2.Optional()),
-        __param(3, core_1.Inject(ui_router_core_3.Globals)), 
-        __metadata('design:paramtypes', [ui_router_core_1.UIRouter, Object, AnchorUISref, Object])
+        __param(3, core_1.Inject(ui_router_core_2.Globals))
     ], UISref);
     return UISref;
 }());

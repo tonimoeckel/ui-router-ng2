@@ -5,9 +5,6 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
@@ -15,10 +12,9 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 var core_1 = require('@angular/core');
 var private_import_core_1 = require('../private_import_core');
 var ui_router_core_1 = require("ui-router-core");
-var ui_router_core_2 = require("ui-router-core");
 var views_1 = require("../statebuilders/views");
+var ui_router_core_2 = require("ui-router-core");
 var ui_router_core_3 = require("ui-router-core");
-var ui_router_core_4 = require("ui-router-core");
 var mergeInjector_1 = require("../mergeInjector");
 /** @hidden */
 var id = 0;
@@ -42,7 +38,7 @@ var ng2ComponentInputs = function (ng2CompClass) {
     var inputs = private_import_core_1.reflector.annotations(ng2CompClass)
         .filter(function (x) { return x instanceof core_1.Component && !!x.inputs; })
         .map(function (x) { return x.inputs; })
-        .reduce(ui_router_core_4.flattenR, [])
+        .reduce(ui_router_core_3.flattenR, [])
         .map(function (input) { return ({ token: input, prop: input }); });
     return _props.concat(inputs);
 };
@@ -145,13 +141,13 @@ var UIView = (function () {
             return;
         // This is a new ViewConfig.  Dispose the previous component
         this.disposeLast();
-        ui_router_core_2.trace.traceUIViewConfigUpdated(this.uiViewData, config && config.viewDecl.$context);
+        ui_router_core_1.trace.traceUIViewConfigUpdated(this.uiViewData, config && config.viewDecl.$context);
         this.applyUpdatedConfig(config);
     };
     UIView.prototype.applyUpdatedConfig = function (config) {
         this.uiViewData.config = config;
         // Create the Injector for the routed component
-        var context = new ui_router_core_3.ResolveContext(config.path);
+        var context = new ui_router_core_2.ResolveContext(config.path);
         var componentInjector = this.getComponentInjector(context);
         // Get the component class from the view declaration. TODO: allow promises?
         var componentClass = config.viewDecl.component;
@@ -180,7 +176,7 @@ var UIView = (function () {
         var parentInject = { context: this.uiViewData.config.viewDecl.$context, fqn: this.uiViewData.fqn };
         newProviders.push({ provide: UIView.PARENT_INJECT, useValue: parentInject });
         var parentComponentInjector = this.viewContainerRef.injector;
-        var moduleInjector = context.getResolvable(ui_router_core_3.NATIVE_INJECTOR_TOKEN).data;
+        var moduleInjector = context.getResolvable(ui_router_core_2.NATIVE_INJECTOR_TOKEN).data;
         var mergedParentInjector = new mergeInjector_1.MergeInjector(moduleInjector, parentComponentInjector);
         return core_1.ReflectiveInjector.resolveAndCreate(newProviders, mergedParentInjector);
     };
@@ -206,25 +202,20 @@ var UIView = (function () {
     };
     UIView.PARENT_INJECT = "UIView.PARENT_INJECT";
     __decorate([
-        core_1.ViewChild('componentTarget', { read: core_1.ViewContainerRef }), 
-        __metadata('design:type', core_1.ViewContainerRef)
-    ], UIView.prototype, "componentTarget", void 0);
+        core_1.ViewChild('componentTarget', { read: core_1.ViewContainerRef })
+    ], UIView.prototype, "componentTarget");
     __decorate([
-        core_1.Input('name'), 
-        __metadata('design:type', String)
-    ], UIView.prototype, "name", void 0);
+        core_1.Input('name')
+    ], UIView.prototype, "name");
     __decorate([
-        core_1.Input('ui-view'), 
-        __metadata('design:type', String), 
-        __metadata('design:paramtypes', [String])
-    ], UIView.prototype, "_name", null);
+        core_1.Input('ui-view')
+    ], UIView.prototype, "_name");
     UIView = __decorate([
         core_1.Component({
             selector: 'ui-view, [ui-view]',
             template: "\n    <template #componentTarget></template>\n    <ng-content *ngIf=\"!componentRef\"></ng-content>\n  "
         }),
-        __param(1, core_1.Inject(UIView.PARENT_INJECT)), 
-        __metadata('design:paramtypes', [ui_router_core_1.UIRouter, Object, core_1.ViewContainerRef])
+        __param(1, core_1.Inject(UIView.PARENT_INJECT))
     ], UIView);
     return UIView;
 }());

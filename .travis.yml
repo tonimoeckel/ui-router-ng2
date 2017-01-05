@@ -1,0 +1,44 @@
+language: node_js
+node_js:
+  - "4.1"
+
+before_script:
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
+  - ./nodeserver.sh > /dev/null &
+
+matrix:
+  allow_failures:
+  - env: CORE_BRANCH=
+
+env:
+  matrix:
+    # CORE_BRANCH env variable specifies the branch of ui-router-core to use during build/test
+    # Each CORE_BRANCH listed here will trigger a SEPARATE job in travis
+    - CORE_BRANCH=master
+
+    # If CORE_BRANCH is empty, it will use the ui-router-core from npm dependencies
+    # (as specified in package.json)
+    - CORE_BRANCH=
+
+script:
+  - echo "CORE_BRANCH = x${CORE_BRANCH}x";
+  - >
+    if [ "x${CORE_BRANCH}x" != "xx" ] ; then
+      echo "Installing ui-router-core from ${CORE_BRANCH}" && \
+      git clone --depth=10 --branch="${CORE_BRANCH}" https://github.com/ui-router/core.git ui-router-core && \
+      pushd ui-router-core && \
+      npm install && \
+      npm run build && \
+      popd && \
+      npm install ./ui-router-core ;
+    fi
+  - npm run build
+
+sudo: false
+
+git:
+  depth: 10
+
+notifications:
+  slack: angularbuddies:b6leQM9gkBCW0S7MNDsELpqU

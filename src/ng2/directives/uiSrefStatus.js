@@ -5,9 +5,6 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
@@ -98,7 +95,7 @@ function getSrefStatus(event, srefTarget) {
         active: isActive(),
         exact: isExact(),
         entering: isStartEvent ? isEntering() : false,
-        exiting: isStartEvent ? isExiting() : false,
+        exiting: isStartEvent ? isExiting() : false
     };
 }
 /** @internalapi */
@@ -107,7 +104,7 @@ function mergeSrefStatus(left, right) {
         active: left.active || right.active,
         exact: left.exact || right.exact,
         entering: left.entering || right.entering,
-        exiting: left.exiting || right.exiting,
+        exiting: left.exiting || right.exiting
     };
 }
 /**
@@ -206,17 +203,14 @@ var UISrefStatus = (function () {
         this.uiSrefStatus.emit(status);
     };
     __decorate([
-        core_1.Output("uiSrefStatus"), 
-        __metadata('design:type', Object)
-    ], UISrefStatus.prototype, "uiSrefStatus", void 0);
+        core_1.Output("uiSrefStatus")
+    ], UISrefStatus.prototype, "uiSrefStatus");
     __decorate([
-        core_1.ContentChildren(uiSref_1.UISref, { descendants: true }), 
-        __metadata('design:type', core_1.QueryList)
-    ], UISrefStatus.prototype, "srefs", void 0);
+        core_1.ContentChildren(uiSref_1.UISref, { descendants: true })
+    ], UISrefStatus.prototype, "srefs");
     UISrefStatus = __decorate([
         core_1.Directive({ selector: '[uiSrefStatus],[uiSrefActive],[uiSrefActiveEq]' }),
-        __param(0, core_1.Inject(ui_router_core_2.Globals)), 
-        __metadata('design:paramtypes', [Object])
+        __param(0, core_1.Inject(ui_router_core_2.Globals))
     ], UISrefStatus);
     return UISrefStatus;
 }());

@@ -5,15 +5,11 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 /** @module directives */ /** */
 var core_1 = require("@angular/core");
-var uiSrefStatus_1 = require("./uiSrefStatus");
 /**
  * A directive that adds a CSS class when its associated `uiSref` link is active.
  *
@@ -118,21 +114,16 @@ var UISrefActive = (function () {
         this._subscription.unsubscribe();
     };
     __decorate([
-        core_1.Input('uiSrefActive'), 
-        __metadata('design:type', String), 
-        __metadata('design:paramtypes', [String])
-    ], UISrefActive.prototype, "active", null);
+        core_1.Input('uiSrefActive')
+    ], UISrefActive.prototype, "active");
     __decorate([
-        core_1.Input('uiSrefActiveEq'), 
-        __metadata('design:type', String), 
-        __metadata('design:paramtypes', [String])
-    ], UISrefActive.prototype, "activeEq", null);
+        core_1.Input('uiSrefActiveEq')
+    ], UISrefActive.prototype, "activeEq");
     UISrefActive = __decorate([
         core_1.Directive({
             selector: '[uiSrefActive],[uiSrefActiveEq]'
         }),
-        __param(2, core_1.Host()), 
-        __metadata('design:paramtypes', [uiSrefStatus_1.UISrefStatus, core_1.Renderer, core_1.ElementRef])
+        __param(2, core_1.Host())
     ], UISrefActive);
     return UISrefActive;
 }());
