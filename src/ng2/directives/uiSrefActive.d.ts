@@ -1,8 +1,6 @@
-/** @module directives */ /** */
-import {Directive, Input, ElementRef, Host, Renderer} from "@angular/core";
-import {UISrefStatus, SrefStatus} from "./uiSrefStatus";
-import {Subscription} from "rxjs/Subscription";
-
+/** @ng2api @module directives */ /** */
+import { ElementRef, Renderer } from "@angular/core";
+import { UISrefStatus } from "./uiSrefStatus";
 /**
  * A directive that adds a CSS class when its associated `uiSref` link is active.
  *
@@ -81,26 +79,12 @@ import {Subscription} from "rxjs/Subscription";
  * </ul>
  * ```
  */
-@Directive({
-  selector: '[uiSrefActive],[uiSrefActiveEq]'
-})
-export class UISrefActive {
-
-  private _classes: string[] = [];
-  @Input('uiSrefActive') set active(val: string) { this._classes = val.split("\s+")};
-
-  private _classesEq: string[] = [];
-  @Input('uiSrefActiveEq') set activeEq(val: string) { this._classesEq = val.split("\s+")};
-
-  private _subscription: Subscription;
-  constructor(uiSrefStatus: UISrefStatus, rnd: Renderer, @Host() host: ElementRef) {
-    this._subscription = uiSrefStatus.uiSrefStatus.subscribe((next: SrefStatus) => {
-      this._classes.forEach(cls => rnd.setElementClass(host.nativeElement, cls, next.active));
-      this._classesEq.forEach(cls => rnd.setElementClass(host.nativeElement, cls, next.exact));
-    });
-  }
-
-  ngOnDestroy() {
-    this._subscription.unsubscribe();
-  }
+export declare class UISrefActive {
+    private _classes;
+    active: string;
+    private _classesEq;
+    activeEq: string;
+    private _subscription;
+    constructor(uiSrefStatus: UISrefStatus, rnd: Renderer, host: ElementRef);
+    ngOnDestroy(): void;
 }

@@ -1,11 +1,10 @@
-"use strict";
 /**
  * Merge two injectors
  *
  * This class implements the Injector ng2 interface but delegates
  * to the Injectors provided in the constructor.
  */
-var MergeInjector = (function () {
+export var MergeInjector = (function () {
     function MergeInjector() {
         var injectors = [];
         for (var _i = 0; _i < arguments.length; _i++) {
@@ -40,5 +39,4 @@ var MergeInjector = (function () {
     MergeInjector.NOT_FOUND = {};
     return MergeInjector;
 }());
-exports.MergeInjector = MergeInjector;
 //# sourceMappingURL=mergeInjector.js.map

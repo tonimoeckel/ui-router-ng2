@@ -1,25 +1,12 @@
-"use strict";
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
-var core_1 = require("@angular/core");
-var core_2 = require("@angular/core");
-var uiView_1 = require("./uiView");
-var ui_router_core_1 = require("ui-router-core");
-var ui_router_core_2 = require("ui-router-core");
-var ReplaySubject_1 = require('rxjs/ReplaySubject');
-require("../rx");
+import { UIRouter, extend } from "ui-router-core";
+import { Directive, Inject, Input, Optional, ElementRef, Renderer } from "@angular/core";
+import { UIView } from "./uiView";
+import { ReplaySubject } from "rxjs/ReplaySubject";
 /**
  * @internalapi
  * # blah blah blah
  */
-var AnchorUISref = (function () {
+export var AnchorUISref = (function () {
     function AnchorUISref(_el, _renderer) {
         this._el = _el;
         this._renderer = _renderer;
@@ -27,12 +14,16 @@ var AnchorUISref = (function () {
     AnchorUISref.prototype.update = function (href) {
         this._renderer.setElementProperty(this._el.nativeElement, 'href', href);
     };
-    AnchorUISref = __decorate([
-        core_1.Directive({ selector: 'a[uiSref]' })
-    ], AnchorUISref);
+    AnchorUISref.decorators = [
+        { type: Directive, args: [{ selector: 'a[uiSref]' },] },
+    ];
+    /** @nocollapse */
+    AnchorUISref.ctorParameters = function () { return [
+        { type: ElementRef, },
+        { type: Renderer, },
+    ]; };
     return AnchorUISref;
 }());
-exports.AnchorUISref = AnchorUISref;
 /**
  * A directive when clicked, initiates a [[Transition]] to a [[TargetState]].
  *
@@ -74,23 +65,19 @@ exports.AnchorUISref = AnchorUISref;
  * <a uiSref="bar" [uiParams]="{ barId: foo.barId }" [uiOptions]="{ inherit: false }">Bar {{foo.barId}}</a>
  * ```
  */
-var UISref = (function () {
-    function UISref(
-        /** @internalapi */ _router, 
-        /** @internalapi */ parent, 
-        /** @internalapi */ _anchorUISref, _globals) {
+export var UISref = (function () {
+    function UISref(_router, _anchorUISref, parent) {
         var _this = this;
-        this._router = _router;
-        this.parent = parent;
-        this._anchorUISref = _anchorUISref;
         /**
          * An observable (ReplaySubject) of the state this UISref is targeting.
          * When the UISref is clicked, it will transition to this [[TargetState]].
          */
-        this.targetState$ = new ReplaySubject_1.ReplaySubject(1);
-        /** @internalapi */
-        this._emit = false;
-        this._statesSub = _globals.states$.subscribe(function () { return _this.update(); });
+        this.targetState$ = new ReplaySubject(1);
+        /** @internalapi */ this._emit = false;
+        this._router = _router;
+        this._anchorUISref = _anchorUISref;
+        this.parent = parent;
+        this._statesSub = _router.globals.states$.subscribe(function () { return _this.update(); });
     }
     Object.defineProperty(UISref.prototype, "uiSref", {
         /** @internalapi */
@@ -136,32 +123,30 @@ var UISref = (function () {
             inherit: true,
             source: "sref"
         };
-        return ui_router_core_1.extend(defaultOpts, this.options || {});
+        return extend(defaultOpts, this.options || {});
     };
     /** When triggered by a (click) event, this function transitions to the UISref's target state */
     UISref.prototype.go = function () {
         this._router.stateService.go(this.state, this.params, this.getOptions());
         return false;
     };
-    __decorate([
-        core_1.Input('uiSref')
-    ], UISref.prototype, "state");
-    __decorate([
-        core_1.Input('uiParams')
-    ], UISref.prototype, "params");
-    __decorate([
-        core_1.Input('uiOptions')
-    ], UISref.prototype, "options");
-    UISref = __decorate([
-        core_1.Directive({
-            selector: '[uiSref]',
-            host: { '(click)': 'go()' }
-        }),
-        __param(1, core_1.Inject(uiView_1.UIView.PARENT_INJECT)),
-        __param(2, core_2.Optional()),
-        __param(3, core_1.Inject(ui_router_core_2.Globals))
-    ], UISref);
+    UISref.decorators = [
+        { type: Directive, args: [{
+                    selector: '[uiSref]',
+                    host: { '(click)': 'go()' }
+                },] },
+    ];
+    /** @nocollapse */
+    UISref.ctorParameters = function () { return [
+        { type: UIRouter, },
+        { type: AnchorUISref, decorators: [{ type: Optional },] },
+        { type: undefined, decorators: [{ type: Inject, args: [UIView.PARENT_INJECT,] },] },
+    ]; };
+    UISref.propDecorators = {
+        'state': [{ type: Input, args: ['uiSref',] },],
+        'params': [{ type: Input, args: ['uiParams',] },],
+        'options': [{ type: Input, args: ['uiOptions',] },],
+    };
     return UISref;
 }());
-exports.UISref = UISref;
 //# sourceMappingURL=uiSref.js.map

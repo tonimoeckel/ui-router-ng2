@@ -1,35 +1,31 @@
-"use strict";
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var core_1 = require("@angular/core");
-var common_1 = require("@angular/common");
-var directives_1 = require("./directives/directives");
-var uiView_1 = require("./directives/uiView");
-var common_2 = require("@angular/common");
-var providers_1 = require("./providers");
-function makeRootProviders(module) {
+import { NgModule, OpaqueToken, ANALYZE_FOR_ENTRY_COMPONENTS } from "@angular/core";
+import { CommonModule, LocationStrategy, HashLocationStrategy, PathLocationStrategy } from "@angular/common";
+import { _UIROUTER_DIRECTIVES } from "./directives/directives";
+import { UIView } from "./directives/uiView";
+import { _UIROUTER_INSTANCE_PROVIDERS, _UIROUTER_SERVICE_PROVIDERS } from "./providers";
+import { ROUTES } from "@angular/router/src/router_config_loader";
+/** @hidden */ export var UIROUTER_ROOT_MODULE = new OpaqueToken("UIRouter Root Module");
+/** @hidden */ export var UIROUTER_MODULE_TOKEN = new OpaqueToken("UIRouter Module");
+/** @hidden */ export var UIROUTER_STATES = new OpaqueToken("UIRouter States");
+// /** @hidden */ export const ROUTES = UIROUTER_STATES;
+export function makeRootProviders(module) {
     return [
-        { provide: exports.UIROUTER_ROOT_MODULE, useValue: module, multi: true },
-        { provide: exports.UIROUTER_MODULE_TOKEN, useValue: module, multi: true },
-        { provide: core_1.ANALYZE_FOR_ENTRY_COMPONENTS, useValue: module.states || [], multi: true },
+        { provide: UIROUTER_ROOT_MODULE, useValue: module, multi: true },
+        { provide: UIROUTER_MODULE_TOKEN, useValue: module, multi: true },
+        { provide: ROUTES, useValue: module.states || [], multi: true },
+        { provide: ANALYZE_FOR_ENTRY_COMPONENTS, useValue: module.states || [], multi: true },
     ];
 }
-exports.makeRootProviders = makeRootProviders;
-function makeChildProviders(module) {
+export function makeChildProviders(module) {
     return [
-        { provide: exports.UIROUTER_MODULE_TOKEN, useValue: module, multi: true },
-        { provide: core_1.ANALYZE_FOR_ENTRY_COMPONENTS, useValue: module.states || [], multi: true },
+        { provide: UIROUTER_MODULE_TOKEN, useValue: module, multi: true },
+        { provide: ROUTES, useValue: module.states || [], multi: true },
+        { provide: ANALYZE_FOR_ENTRY_COMPONENTS, useValue: module.states || [], multi: true },
     ];
 }
-exports.makeChildProviders = makeChildProviders;
-function locationStrategy(useHash) {
-    return { provide: common_2.LocationStrategy, useClass: useHash ? common_2.HashLocationStrategy : common_2.PathLocationStrategy };
+export function locationStrategy(useHash) {
+    return { provide: LocationStrategy, useClass: useHash ? HashLocationStrategy : PathLocationStrategy };
 }
-exports.locationStrategy = locationStrategy;
 /**
  * Creates UI-Router Modules
  *
@@ -51,7 +47,7 @@ exports.locationStrategy = locationStrategy;
  *
  * Any routed components are added as `entryComponents:` so they will get compiled.
  */
-var UIRouterModule = (function () {
+export var UIRouterModule = (function () {
     function UIRouterModule() {
     }
     /**
@@ -95,8 +91,8 @@ var UIRouterModule = (function () {
         return {
             ngModule: UIRouterModule,
             providers: [
-                providers_1._UIROUTER_INSTANCE_PROVIDERS,
-                providers_1._UIROUTER_SERVICE_PROVIDERS,
+                _UIROUTER_INSTANCE_PROVIDERS,
+                _UIROUTER_SERVICE_PROVIDERS,
                 locationStrategy(config.useHash)
             ].concat(makeRootProviders(config))
         };
@@ -129,22 +125,19 @@ var UIRouterModule = (function () {
         if (module === void 0) { module = {}; }
         return {
             ngModule: UIRouterModule,
-            providers: makeChildProviders(module)
+            providers: makeChildProviders(module),
         };
     };
-    UIRouterModule = __decorate([
-        core_1.NgModule({
-            imports: [common_1.CommonModule],
-            declarations: [directives_1._UIROUTER_DIRECTIVES],
-            exports: [directives_1._UIROUTER_DIRECTIVES],
-            entryComponents: [uiView_1.UIView]
-        })
-    ], UIRouterModule);
+    UIRouterModule.decorators = [
+        { type: NgModule, args: [{
+                    imports: [CommonModule],
+                    declarations: [_UIROUTER_DIRECTIVES],
+                    exports: [_UIROUTER_DIRECTIVES],
+                    entryComponents: [UIView],
+                },] },
+    ];
+    /** @nocollapse */
+    UIRouterModule.ctorParameters = function () { return []; };
     return UIRouterModule;
 }());
-exports.UIRouterModule = UIRouterModule;
-/** @hidden */
-exports.UIROUTER_ROOT_MODULE = new core_1.OpaqueToken("UIRouter Root Module");
-/** @hidden */
-exports.UIROUTER_MODULE_TOKEN = new core_1.OpaqueToken("UIRouter Module");
 //# sourceMappingURL=uiRouterNgModule.js.map

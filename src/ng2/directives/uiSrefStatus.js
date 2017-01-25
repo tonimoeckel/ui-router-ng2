@@ -1,22 +1,11 @@
-"use strict";
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
-/** @module directives */ /** */
-var core_1 = require("@angular/core");
-var uiSref_1 = require("./uiSref");
-var ui_router_core_1 = require("ui-router-core");
-var ui_router_core_2 = require("ui-router-core");
-var ui_router_core_3 = require("ui-router-core");
-var ui_router_core_4 = require("ui-router-core");
-var Observable_1 = require("rxjs/Observable");
-var BehaviorSubject_1 = require("rxjs/BehaviorSubject");
+import { Directive, Output, EventEmitter, ContentChildren } from "@angular/core";
+import { UISref } from "./uiSref";
+import { anyTrueR, tail, unnestR } from "ui-router-core";
+import { UIRouterGlobals } from "ui-router-core";
+import { Param } from "ui-router-core";
+import { PathFactory } from "ui-router-core";
+import { Observable } from "rxjs/Observable";
+import { BehaviorSubject } from "rxjs/BehaviorSubject";
 /** @internalapi */
 var inactiveStatus = {
     active: false,
@@ -37,16 +26,16 @@ var pathMatches = function (target) {
         return function () { return false; };
     var state = target.$state();
     var targetParamVals = target.params();
-    var targetPath = ui_router_core_4.PathFactory.buildPath(target);
+    var targetPath = PathFactory.buildPath(target);
     var paramSchema = targetPath.map(function (node) { return node.paramSchema; })
-        .reduce(ui_router_core_1.unnestR, [])
+        .reduce(unnestR, [])
         .filter(function (param) { return targetParamVals.hasOwnProperty(param.id); });
     return function (path) {
-        var tailNode = ui_router_core_1.tail(path);
+        var tailNode = tail(path);
         if (!tailNode || tailNode.state !== state)
             return false;
-        var paramValues = ui_router_core_4.PathFactory.paramValues(path);
-        return ui_router_core_3.Param.equals(paramSchema, paramValues, targetParamVals);
+        var paramValues = PathFactory.paramValues(path);
+        return Param.equals(paramSchema, paramValues, targetParamVals);
     };
 };
 /**
@@ -57,7 +46,7 @@ var pathMatches = function (target) {
  * @internalapi
  */
 function spreadToSubPaths(basePath, appendPath) {
-    return appendPath.map(function (node) { return basePath.concat(ui_router_core_4.PathFactory.subPath(appendPath, function (n) { return n.state === node.state; })); });
+    return appendPath.map(function (node) { return basePath.concat(PathFactory.subPath(appendPath, function (n) { return n.state === node.state; })); });
 }
 /**
  * Given a TransEvt (Transition event: started, success, error)
@@ -76,7 +65,7 @@ function getSrefStatus(event, srefTarget) {
     var isActive = function () {
         return spreadToSubPaths([], activePath)
             .map(pathMatchesTarget)
-            .reduce(ui_router_core_1.anyTrueR, false);
+            .reduce(anyTrueR, false);
     };
     var isExact = function () {
         return pathMatchesTarget(activePath);
@@ -84,18 +73,18 @@ function getSrefStatus(event, srefTarget) {
     var isEntering = function () {
         return spreadToSubPaths(tc.retained, tc.entering)
             .map(pathMatchesTarget)
-            .reduce(ui_router_core_1.anyTrueR, false);
+            .reduce(anyTrueR, false);
     };
     var isExiting = function () {
         return spreadToSubPaths(tc.retained, tc.exiting)
             .map(pathMatchesTarget)
-            .reduce(ui_router_core_1.anyTrueR, false);
+            .reduce(anyTrueR, false);
     };
     return {
         active: isActive(),
         exact: isExact(),
         entering: isStartEvent ? isEntering() : false,
-        exiting: isStartEvent ? isExiting() : false
+        exiting: isStartEvent ? isExiting() : false,
     };
 }
 /** @internalapi */
@@ -104,7 +93,7 @@ function mergeSrefStatus(left, right) {
         active: left.active || right.active,
         exact: left.exact || right.exact,
         entering: left.entering || right.entering,
-        exiting: left.exiting || right.exiting
+        exiting: left.exiting || right.exiting,
     };
 }
 /**
@@ -155,11 +144,11 @@ function mergeSrefStatus(left, right) {
  *
  * This API is subject to change.
  */
-var UISrefStatus = (function () {
+export var UISrefStatus = (function () {
     function UISrefStatus(_globals) {
-        this._globals = _globals;
         /** current statuses of the state/params the uiSref directive is linking to */
-        this.uiSrefStatus = new core_1.EventEmitter(false);
+        this.uiSrefStatus = new EventEmitter(false);
+        this._globals = _globals;
         this.status = Object.assign({}, inactiveStatus);
     }
     UISrefStatus.prototype.ngAfterContentInit = function () {
@@ -168,17 +157,17 @@ var UISrefStatus = (function () {
         // start -> (success|error)
         var transEvents$ = this._globals.start$.switchMap(function (trans) {
             var event = function (evt) { return ({ evt: evt, trans: trans }); };
-            var transStart$ = Observable_1.Observable.of(event("start"));
+            var transStart$ = Observable.of(event("start"));
             var transResult = trans.promise.then(function () { return event("success"); }, function () { return event("error"); });
-            var transFinish$ = Observable_1.Observable.fromPromise(transResult);
+            var transFinish$ = Observable.fromPromise(transResult);
             return transStart$.concat(transFinish$);
         });
         // Watch the @ContentChildren UISref[] components and get their target states
         // let srefs$: Observable<UISref[]> = Observable.of(this.srefs.toArray()).concat(this.srefs.changes);
-        this._srefs$ = new BehaviorSubject_1.BehaviorSubject(this.srefs.toArray());
+        this._srefs$ = new BehaviorSubject(this.srefs.toArray());
         this._srefChangesSub = this.srefs.changes.subscribe(function (srefs) { return _this._srefs$.next(srefs); });
         var targetStates$ = this._srefs$.switchMap(function (srefs) {
-            return Observable_1.Observable.combineLatest(srefs.map(function (sref) { return sref.targetState$; }));
+            return Observable.combineLatest(srefs.map(function (sref) { return sref.targetState$; }));
         });
         // Calculate the status of each UISref based on the transition event.
         // Reduce the statuses (if multiple) by or-ing each flag.
@@ -202,17 +191,17 @@ var UISrefStatus = (function () {
         this.status = status;
         this.uiSrefStatus.emit(status);
     };
-    __decorate([
-        core_1.Output("uiSrefStatus")
-    ], UISrefStatus.prototype, "uiSrefStatus");
-    __decorate([
-        core_1.ContentChildren(uiSref_1.UISref, { descendants: true })
-    ], UISrefStatus.prototype, "srefs");
-    UISrefStatus = __decorate([
-        core_1.Directive({ selector: '[uiSrefStatus],[uiSrefActive],[uiSrefActiveEq]' }),
-        __param(0, core_1.Inject(ui_router_core_2.Globals))
-    ], UISrefStatus);
+    UISrefStatus.decorators = [
+        { type: Directive, args: [{ selector: '[uiSrefStatus],[uiSrefActive],[uiSrefActiveEq]' },] },
+    ];
+    /** @nocollapse */
+    UISrefStatus.ctorParameters = function () { return [
+        { type: UIRouterGlobals, },
+    ]; };
+    UISrefStatus.propDecorators = {
+        'uiSrefStatus': [{ type: Output, args: ["uiSrefStatus",] },],
+        'srefs': [{ type: ContentChildren, args: [UISref, { descendants: true },] },],
+    };
     return UISrefStatus;
 }());
-exports.UISrefStatus = UISrefStatus;
 //# sourceMappingURL=uiSrefStatus.js.map

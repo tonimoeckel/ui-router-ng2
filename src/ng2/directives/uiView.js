@@ -1,21 +1,11 @@
-"use strict";
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
-/** @module directives */ /** */
-var core_1 = require('@angular/core');
-var private_import_core_1 = require('../private_import_core');
-var ui_router_core_1 = require("ui-router-core");
-var views_1 = require("../statebuilders/views");
-var ui_router_core_2 = require("ui-router-core");
-var ui_router_core_3 = require("ui-router-core");
-var mergeInjector_1 = require("../mergeInjector");
+import { Component, ComponentFactoryResolver, ViewContainerRef, Input, ReflectiveInjector, ViewChild, Inject } from '@angular/core';
+import { reflector } from '../private_import_core';
+import { UIRouter } from "ui-router-core";
+import { trace } from "ui-router-core";
+import { Ng2ViewConfig } from "../statebuilders/views";
+import { ResolveContext, NATIVE_INJECTOR_TOKEN } from "ui-router-core";
+import { flattenR } from "ui-router-core";
+import { MergeInjector } from "../mergeInjector";
 /** @hidden */
 var id = 0;
 /**
@@ -28,17 +18,17 @@ var id = 0;
  */
 var ng2ComponentInputs = function (ng2CompClass) {
     /** Get "@Input('foo') _foo" inputs */
-    var props = private_import_core_1.reflector.propMetadata(ng2CompClass);
+    var props = reflector.propMetadata(ng2CompClass);
     var _props = Object.keys(props || {})
         .map(function (key) { return ({ key: key, annoArr: props[key] }); })
         .reduce(function (acc, tuple) { return acc.concat(tuple.annoArr.map(function (anno) { return ({ key: tuple.key, anno: anno }); })); }, [])
-        .filter(function (tuple) { return tuple.anno instanceof core_1.Input; })
+        .filter(function (tuple) { return tuple.anno instanceof Input; })
         .map(function (tuple) { return ({ token: tuple.anno.bindingPropertyName || tuple.key, prop: tuple.key }); });
     /** Get "inputs: ['foo']" inputs */
-    var inputs = private_import_core_1.reflector.annotations(ng2CompClass)
-        .filter(function (x) { return x instanceof core_1.Component && !!x.inputs; })
+    var inputs = reflector.annotations(ng2CompClass)
+        .filter(function (x) { return x instanceof Component && !!x.inputs; })
         .map(function (x) { return x.inputs; })
-        .reduce(ui_router_core_3.flattenR, [])
+        .reduce(flattenR, [])
         .map(function (input) { return ({ token: input, prop: input }); });
     return _props.concat(inputs);
 };
@@ -88,7 +78,7 @@ var ng2ComponentInputs = function (ng2CompClass) {
  * <ui-view></ui-view>
  * ```
  */
-var UIView = (function () {
+export var UIView = (function () {
     function UIView(router, parent, viewContainerRef) {
         this.router = router;
         this.viewContainerRef = viewContainerRef;
@@ -134,25 +124,25 @@ var UIView = (function () {
         if (!config)
             return this.disposeLast();
         // Only care about Ng2 configs
-        if (!(config instanceof views_1.Ng2ViewConfig))
+        if (!(config instanceof Ng2ViewConfig))
             return;
         // The "new" viewconfig is already applied, so exit early
         if (this.uiViewData.config === config)
             return;
         // This is a new ViewConfig.  Dispose the previous component
         this.disposeLast();
-        ui_router_core_1.trace.traceUIViewConfigUpdated(this.uiViewData, config && config.viewDecl.$context);
+        trace.traceUIViewConfigUpdated(this.uiViewData, config && config.viewDecl.$context);
         this.applyUpdatedConfig(config);
     };
     UIView.prototype.applyUpdatedConfig = function (config) {
         this.uiViewData.config = config;
         // Create the Injector for the routed component
-        var context = new ui_router_core_2.ResolveContext(config.path);
+        var context = new ResolveContext(config.path);
         var componentInjector = this.getComponentInjector(context);
         // Get the component class from the view declaration. TODO: allow promises?
         var componentClass = config.viewDecl.component;
         // Create the component
-        var compFactoryResolver = componentInjector.get(core_1.ComponentFactoryResolver);
+        var compFactoryResolver = componentInjector.get(ComponentFactoryResolver);
         var compFactory = compFactoryResolver.resolveComponentFactory(componentClass);
         this.componentRef = this.componentTarget.createComponent(compFactory, undefined, componentInjector);
         // Wire resolves to @Input()s
@@ -176,9 +166,9 @@ var UIView = (function () {
         var parentInject = { context: this.uiViewData.config.viewDecl.$context, fqn: this.uiViewData.fqn };
         newProviders.push({ provide: UIView.PARENT_INJECT, useValue: parentInject });
         var parentComponentInjector = this.viewContainerRef.injector;
-        var moduleInjector = context.getResolvable(ui_router_core_2.NATIVE_INJECTOR_TOKEN).data;
-        var mergedParentInjector = new mergeInjector_1.MergeInjector(moduleInjector, parentComponentInjector);
-        return core_1.ReflectiveInjector.resolveAndCreate(newProviders, mergedParentInjector);
+        var moduleInjector = context.getResolvable(NATIVE_INJECTOR_TOKEN).data;
+        var mergedParentInjector = new MergeInjector(moduleInjector, parentComponentInjector);
+        return ReflectiveInjector.resolveAndCreate(newProviders, mergedParentInjector);
     };
     /**
      * Supplies component inputs with resolve data
@@ -201,23 +191,23 @@ var UIView = (function () {
         ref.changeDetectorRef.detectChanges();
     };
     UIView.PARENT_INJECT = "UIView.PARENT_INJECT";
-    __decorate([
-        core_1.ViewChild('componentTarget', { read: core_1.ViewContainerRef })
-    ], UIView.prototype, "componentTarget");
-    __decorate([
-        core_1.Input('name')
-    ], UIView.prototype, "name");
-    __decorate([
-        core_1.Input('ui-view')
-    ], UIView.prototype, "_name");
-    UIView = __decorate([
-        core_1.Component({
-            selector: 'ui-view, [ui-view]',
-            template: "\n    <template #componentTarget></template>\n    <ng-content *ngIf=\"!componentRef\"></ng-content>\n  "
-        }),
-        __param(1, core_1.Inject(UIView.PARENT_INJECT))
-    ], UIView);
+    UIView.decorators = [
+        { type: Component, args: [{
+                    selector: 'ui-view, [ui-view]',
+                    template: "\n    <template #componentTarget></template>\n    <ng-content *ngIf=\"!componentRef\"></ng-content>\n  "
+                },] },
+    ];
+    /** @nocollapse */
+    UIView.ctorParameters = function () { return [
+        { type: UIRouter, },
+        { type: undefined, decorators: [{ type: Inject, args: [UIView.PARENT_INJECT,] },] },
+        { type: ViewContainerRef, },
+    ]; };
+    UIView.propDecorators = {
+        'componentTarget': [{ type: ViewChild, args: ['componentTarget', { read: ViewContainerRef },] },],
+        'name': [{ type: Input, args: ['name',] },],
+        '_name': [{ type: Input, args: ['ui-view',] },],
+    };
     return UIView;
 }());
-exports.UIView = UIView;
 //# sourceMappingURL=uiView.js.map

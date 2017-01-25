@@ -1,189 +1,91 @@
-"use strict";
-/**
- * # UI-Router for Angular 2
- *
- * - [ui-router-ng2 home page](https://ui-router.github.io/ng2)
- * - [tutorials](https://ui-router.github.io/tutorial/ng2/helloworld)
- * - [quick start repository](http://github.com/ui-router/quickstart-ng2)
- *
- * Getting started:
- *
- * - Use npm. Add a dependency on latest `ui-router-ng2`
- * - Import UI-Router classes directly from `"ui-router-ng2"`
- *
- * ```js
- * import {StateRegistry} from "ui-router-ng2";
- * ```
- *
- * - Create application states (as defined by [[Ng2StateDeclaration]]).
- *
- * ```js
- * export let state1: Ng2StateDeclaration = {
- *   name: 'state1',
- *   component: State1Component,
- *   url: '/one'
- * }
- *
- * export let state2: Ng2StateDeclaration = {
- *   name: 'state2',
- *   component: State2Component,
- *   url: '/two'
- * }
- * ```
- *
- * - Import a [[UIRouterModule.forChild]] module into your feature `NgModule`s.
- *
- * ```js
- * @ NgModule({
- *   imports: [
- *     SharedModule,
- *     UIRouterModule.forChild({ states: [state1, state2 ] })
- *   ],
- *   declarations: [
- *     State1Component,
- *     State2Component,
- *   ]
- * })
- * export class MyFeatureModule {}
- * ```
- *
- * - Import a [[UIRouterModule.forRoot]] module into your application root `NgModule`
- * - Either bootstrap a [[UIView]] component, or add a `<ui-view></ui-view>` viewport to your root component.
- *
- * ```js
- * @ NgModule({
- *   imports: [
- *     BrowserModule,
- *     UIRouterModule.forRoot({ states: [ homeState ] }),
- *     MyFeatureModule,
- *   ],
- *   declarations: [
- *     HomeComponent
- *   ]
- *   bootstrap: [ UIView ]
- * })
- * class RootAppModule {}
- *
- * browserPlatformDynamic.bootstrapModule(RootAppModule);
- * ```
- *
- * - Optionally specify a configuration class [[ChildModule.configClass]] for any module
- * to perform any router configuration during bootstrap or lazyload.
- * Pass the class to [[UIRouterModule.forRoot]] or [[UIRouterModule.forChild]].
- *
- * ```js
- * import {UIRouter} from "ui-router-ng2";
- *
- * @ Injectable()
- * export class MyUIRouterConfig {
- *   // Constructor is injectable
- *   constructor(uiRouter: UIRouter) {
- *     uiRouter.urlMatcherFactory.type('datetime', myDateTimeParamType);
- *   }
- * }
- * ```
- *
- * @preferred @module ng2
- */ /** */
-var core_1 = require("@angular/core");
-var ui_router_core_1 = require("ui-router-core");
-var ui_router_core_2 = require("ui-router-core");
-var ui_router_core_3 = require("ui-router-core");
-var ui_router_core_4 = require("ui-router-core");
-var ui_router_core_5 = require("ui-router-core");
-var ui_router_core_6 = require("ui-router-core");
-var ui_router_core_7 = require("ui-router-core");
-var uiView_1 = require("./directives/uiView");
-var views_1 = require("./statebuilders/views");
-var uiRouterConfig_1 = require("./uiRouterConfig");
-var ui_router_core_8 = require("ui-router-core");
-var location_1 = require("./location");
-var ui_router_core_9 = require("ui-router-core");
-var ui_router_core_10 = require("ui-router-core");
-var uiRouterNgModule_1 = require("./uiRouterNgModule");
-var rx_1 = require("./rx");
-var ui_router_core_11 = require("ui-router-core");
+import { Injector } from "@angular/core";
+import { UIRouter, StateRegistry, StateService, TransitionService, UrlMatcherFactory, UrlRouter, ViewService, UrlService, UIRouterGlobals, services, Resolvable, NATIVE_INJECTOR_TOKEN } from "ui-router-core";
+import { UIView } from "./directives/uiView";
+import { ng2ViewsBuilder, Ng2ViewConfig } from "./statebuilders/views";
+import { applyRootModuleConfig, applyModuleConfig } from "./uiRouterConfig";
+import { UIROUTER_ROOT_MODULE, UIROUTER_MODULE_TOKEN } from "./uiRouterNgModule";
+import { servicesPlugin } from "ui-router-core";
+import { ng2LazyLoadBuilder } from "./statebuilders/lazyLoad";
+import { UIRouterRx } from "ui-router-rx";
+import { LocationStrategy } from "@angular/common";
+import { Ng2LocationServices } from "./location/locationService";
+import { Ng2LocationConfig } from "./location/locationConfig";
 /**
  * This is a factory function for a UIRouter instance
  *
  * Creates a UIRouter instance and configures it for Angular 2, then invokes router bootstrap.
  * This function is used as an Angular 2 `useFactory` Provider.
  */
-function uiRouterFactory(location, injector) {
-    var rootModules = injector.get(uiRouterNgModule_1.UIROUTER_ROOT_MODULE);
-    var modules = injector.get(uiRouterNgModule_1.UIROUTER_MODULE_TOKEN);
+export function uiRouterFactory(locationStrategy, injector) {
+    var rootModules = injector.get(UIROUTER_ROOT_MODULE);
+    var modules = injector.get(UIROUTER_MODULE_TOKEN);
     if (rootModules.length !== 1) {
         throw new Error("Exactly one UIRouterModule.forRoot() should be in the bootstrapped app module's imports: []");
     }
-    // ----------------- Monkey Patches ----------------
-    // Monkey patch the services.$injector to the ng2 Injector
-    ui_router_core_9.services.$injector.get = injector.get.bind(injector);
-    // Monkey patch the services.$location with ng2 Location implementation
-    location.init();
     // ----------------- Create router -----------------
     // Create a new ng2 UIRouter and configure it for ng2
-    var router = new ui_router_core_1.UIRouter();
-    new rx_1.UIRouterRx(router);
-    var registry = router.stateRegistry;
+    var router = new UIRouter();
+    // Add RxJS plugin
+    router.plugin(UIRouterRx);
+    // Add $q-like and $injector-like service APIs
+    router.plugin(servicesPlugin);
+    // ----------------- Monkey Patches ----------------
+    // Monkey patch the services.$injector to use the root ng2 Injector
+    services.$injector.get = injector.get.bind(injector);
     // ----------------- Configure for ng2 -------------
+    router.locationService = new Ng2LocationServices(router, locationStrategy);
+    router.locationConfig = new Ng2LocationConfig(router, locationStrategy);
     // Apply ng2 ui-view handling code
-    router.viewService.viewConfigFactory("ng2", function (path, config) { return new views_1.Ng2ViewConfig(path, config); });
-    registry.decorator('views', views_1.ng2ViewsBuilder);
+    var viewConfigFactory = function (path, config) { return new Ng2ViewConfig(path, config); };
+    router.viewService._pluginapi._viewConfigFactory("ng2", viewConfigFactory);
     // Apply statebuilder decorator for ng2 NgModule registration
-    registry.stateQueue.flush(router.stateService);
+    var registry = router.stateRegistry;
+    registry.decorator('views', ng2ViewsBuilder);
+    registry.decorator('lazyLoad', ng2LazyLoadBuilder);
     // Prep the tree of NgModule by placing the root NgModule's Injector on the root state.
-    var ng2InjectorResolvable = ui_router_core_10.Resolvable.fromData(ui_router_core_11.NATIVE_INJECTOR_TOKEN, injector);
+    var ng2InjectorResolvable = Resolvable.fromData(NATIVE_INJECTOR_TOKEN, injector);
     registry.root().resolvables.push(ng2InjectorResolvable);
+    // Auto-flush the parameter type queue
+    router.urlMatcherFactory.$get();
     // ----------------- Initialize router -------------
-    // Allow states to be registered
-    registry.stateQueue.autoFlush(router.stateService);
     setTimeout(function () {
-        rootModules.forEach(function (moduleConfig) { return uiRouterConfig_1.applyRootModuleConfig(router, injector, moduleConfig); });
-        modules.forEach(function (moduleConfig) { return uiRouterConfig_1.applyModuleConfig(router, injector, moduleConfig); });
+        rootModules.forEach(function (moduleConfig) { return applyRootModuleConfig(router, injector, moduleConfig); });
+        modules.forEach(function (moduleConfig) { return applyModuleConfig(router, injector, moduleConfig); });
         // Start monitoring the URL
-        if (!router.urlRouterProvider.interceptDeferred) {
-            router.urlRouter.listen();
-            router.urlRouter.sync();
+        if (!router.urlRouter.interceptDeferred) {
+            router.urlService.listen();
+            router.urlService.sync();
         }
     });
     return router;
 }
-exports.uiRouterFactory = uiRouterFactory;
-;
-function parentUIViewInjectFactory(r) { return { fqn: null, context: r.root() }; }
-exports.parentUIViewInjectFactory = parentUIViewInjectFactory;
-exports._UIROUTER_INSTANCE_PROVIDERS = [
-    { provide: ui_router_core_1.UIRouter, useFactory: uiRouterFactory, deps: [location_1.UIRouterLocation, core_1.Injector] },
-    { provide: location_1.UIRouterLocation, useClass: location_1.UIRouterLocation },
-    { provide: uiView_1.UIView.PARENT_INJECT, useFactory: parentUIViewInjectFactory, deps: [ui_router_core_2.StateRegistry] },
+export function parentUIViewInjectFactory(r) { return { fqn: null, context: r.root() }; }
+export var _UIROUTER_INSTANCE_PROVIDERS = [
+    { provide: UIRouter, useFactory: uiRouterFactory, deps: [LocationStrategy, Injector] },
+    { provide: UIView.PARENT_INJECT, useFactory: parentUIViewInjectFactory, deps: [StateRegistry] },
 ];
-function fnstateService(r) { return r.stateService; }
-exports.fnstateService = fnstateService;
-function fntransitionService(r) { return r.transitionService; }
-exports.fntransitionService = fntransitionService;
-function fnurlMatcherFactory(r) { return r.urlMatcherFactory; }
-exports.fnurlMatcherFactory = fnurlMatcherFactory;
-function fnurlRouter(r) { return r.urlRouter; }
-exports.fnurlRouter = fnurlRouter;
-function fnviewService(r) { return r.viewService; }
-exports.fnviewService = fnviewService;
-function fnstateRegistry(r) { return r.stateRegistry; }
-exports.fnstateRegistry = fnstateRegistry;
-function fnglobals(r) { return r.globals; }
-exports.fnglobals = fnglobals;
-exports._UIROUTER_SERVICE_PROVIDERS = [
-    { provide: ui_router_core_3.StateService, useFactory: fnstateService, deps: [ui_router_core_1.UIRouter] },
-    { provide: ui_router_core_4.TransitionService, useFactory: fntransitionService, deps: [ui_router_core_1.UIRouter] },
-    { provide: ui_router_core_5.UrlMatcherFactory, useFactory: fnurlMatcherFactory, deps: [ui_router_core_1.UIRouter] },
-    { provide: ui_router_core_6.UrlRouter, useFactory: fnurlRouter, deps: [ui_router_core_1.UIRouter] },
-    { provide: ui_router_core_7.ViewService, useFactory: fnviewService, deps: [ui_router_core_1.UIRouter] },
-    { provide: ui_router_core_2.StateRegistry, useFactory: fnstateRegistry, deps: [ui_router_core_1.UIRouter] },
-    { provide: ui_router_core_8.Globals, useFactory: fnglobals, deps: [ui_router_core_1.UIRouter] },
+export function fnStateService(r) { return r.stateService; }
+export function fnTransitionService(r) { return r.transitionService; }
+export function fnUrlMatcherFactory(r) { return r.urlMatcherFactory; }
+export function fnUrlRouter(r) { return r.urlRouter; }
+export function fnUrlService(r) { return r.urlService; }
+export function fnViewService(r) { return r.viewService; }
+export function fnStateRegistry(r) { return r.stateRegistry; }
+export function fnGlobals(r) { return r.globals; }
+export var _UIROUTER_SERVICE_PROVIDERS = [
+    { provide: StateService, useFactory: fnStateService, deps: [UIRouter] },
+    { provide: TransitionService, useFactory: fnTransitionService, deps: [UIRouter] },
+    { provide: UrlMatcherFactory, useFactory: fnUrlMatcherFactory, deps: [UIRouter] },
+    { provide: UrlRouter, useFactory: fnUrlRouter, deps: [UIRouter] },
+    { provide: UrlService, useFactory: fnUrlService, deps: [UIRouter] },
+    { provide: ViewService, useFactory: fnViewService, deps: [UIRouter] },
+    { provide: StateRegistry, useFactory: fnStateRegistry, deps: [UIRouter] },
+    { provide: UIRouterGlobals, useFactory: fnGlobals, deps: [UIRouter] },
 ];
 /**
  * The UI-Router providers, for use in your application bootstrap
  *
  * @deprecated use [[UIRouterModule.forRoot]]
  */
-exports.UIROUTER_PROVIDERS = exports._UIROUTER_INSTANCE_PROVIDERS.concat(exports._UIROUTER_SERVICE_PROVIDERS);
+export var UIROUTER_PROVIDERS = _UIROUTER_INSTANCE_PROVIDERS.concat(_UIROUTER_SERVICE_PROVIDERS);
 //# sourceMappingURL=providers.js.map
